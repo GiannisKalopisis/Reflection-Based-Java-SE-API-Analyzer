@@ -1,3 +1,6 @@
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import java.lang.Module;
@@ -6,41 +9,61 @@ import java.util.stream.Collectors; // Import the Collectors class
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("\n" +
-                "       __       ___   ____    ____  ___             ___      .______    __         ___      .__   __.      ___       __      ____    ____  ________   _______ .______       __   __   __  \n" +
-                "      |  |     /   \\  \\   \\  /   / /   \\           /   \\     |   _  \\  |  |       /   \\     |  \\ |  |     /   \\     |  |     \\   \\  /   / |       /  |   ____||   _  \\     |  | |  | |  | \n" +
-                "      |  |    /  ^  \\  \\   \\/   / /  ^  \\         /  ^  \\    |  |_)  | |  |      /  ^  \\    |   \\|  |    /  ^  \\    |  |      \\   \\/   /  `---/  /   |  |__   |  |_)  |    |  | |  | |  | \n" +
-                ".--.  |  |   /  /_\\  \\  \\      / /  /_\\  \\       /  /_\\  \\   |   ___/  |  |     /  /_\\  \\   |  . `  |   /  /_\\  \\   |  |       \\_    _/      /  /    |   __|  |      /     |  | |  | |  | \n" +
-                "|  `--'  |  /  _____  \\  \\    / /  _____  \\     /  _____  \\  |  |      |  |    /  _____  \\  |  |\\   |  /  _____  \\  |  `----.    |  |       /  /----.|  |____ |  |\\  \\----.|__| |__| |__| \n" +
-                " \\______/  /__/     \\__\\  \\__/ /__/     \\__\\   /__/     \\__\\ | _|      |__|   /__/     \\__\\ |__| \\__| /__/     \\__\\ |_______|    |__|      /________||_______|| _| `._____|(__) (__) (__) \n" +
-                "                                                                                                                                                                                          \n");
+        IOHelper.printEntryMessage();
 
-        int topN = IOHelper.topNParameterParser(args);
+        int topN = Utils.topNParameterParser(args);
 
-        JavaModulesFinder javaModulesFinder = new JavaModulesFinder();
+        JavaSEModulesFinder javaModulesFinder = new JavaSEModulesFinder();
+        List<Module> modulesList = javaModulesFinder.findUniqueAPIModules(ModuleLayer.boot().modules());
         javaModulesFinder.sortModules();
 
-        List<Module> test = new ArrayList<>(Collections.singleton(javaModulesFinder.getApiModuleList().get(0)));
+        ModuleFinder finder = ModuleFinder.ofSystem();
+        Set<ModuleReference> moduleReferences = finder.findAll();
+        List<ModuleReference> mdlRef = moduleReferences.stream()
+                .filter(moduleReference ->
+                        (moduleReference.descriptor().name().startsWith("java.") ||
+                                moduleReference.descriptor().name().startsWith("javax.")) &&
+                                !moduleReference.descriptor().name().contains("smartcardio"))
+                .sorted(Comparator.comparing(moduleReference -> moduleReference.descriptor().name()))
+                .toList();
 
-        List<String> frontierPackages = javaModulesFinder.getApiModuleList()
+//        Utils.sortList(mdlRef, Comparator.comparing(m -> m.descriptor().name()));
+
+        List<String> frontierPackages = mdlRef
                 .stream()
-                .flatMap(module -> module.getPackages().stream())
+                .flatMap(module -> module.descriptor().packages().stream())
                 .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax."))
                 .collect(Collectors.toCollection(ArrayList::new));
 
-        Utils.sortList(frontierPackages, Comparator.naturalOrder());
-
-//        for (String pkg : frontierPackages) {
-//            Package p = Package.getPackage(pkg);
-//            System.out.println(p.getName());
-//        }
+//        Utils.sortList(frontierPackages, Comparator.naturalOrder());
+        List<Type> testGenericSuperclass = new ArrayList<>();
+        for (ModuleReference value : mdlRef) {
+            List<ModuleReference> test = new ArrayList<>(Collections.singleton(value));
+            List<String> tempPkgList = test.stream()
+                    .flatMap(module -> module.descriptor().packages().stream())
+                    .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax.") || pkg.startsWith("org."))
+                    .collect(Collectors.toCollection(ArrayList::new));
+            Utils.sortList(tempPkgList, Comparator.naturalOrder());
+            System.out.println("Module \"" + value.descriptor().name() + "\"");
+            for (String s : tempPkgList) {
+                System.out.println("\t" + s);
+//                Package pkg = Package.getPackage(s);
+//                Class<?> cls = pkg.getClass();
+//                Collections.addAll(testGenericSuperclass, cls.getGenericInterfaces());
+            }
+            System.out.println("--------------------------------------\n");
+        }
 
 //            Package p = Package.getPackage(packageName);
 
         System.out.println("\npackages: " + frontierPackages.size());
 
+//        for (Type type: testGenericSuperclass) {
+//            System.out.println(type.getTypeName());
+//        }
+
 
 //        IOHelper.printModulesToTerminal(javaModulesFinder.getApiModuleList());
-        IOHelper.printModulesNumberResults(javaModulesFinder.getApiModuleList());
+        IOHelper.printModulesNumberResults(mdlRef);
     }
 }

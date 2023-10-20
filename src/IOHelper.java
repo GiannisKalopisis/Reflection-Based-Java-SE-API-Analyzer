@@ -2,20 +2,20 @@ import java.util.List;
 
 public class IOHelper {
 
-    public static int topNParameterParser(String[] args) {
-        int topN;
-        try {
-            topN = Integer.parseInt(args[0]);
-            System.out.println("Top-N parameter: " + topN);
-        } catch (NullPointerException | IndexOutOfBoundsException | NumberFormatException exception) {
-            System.err.println(exception);
-            System.out.println("Default top-N parameter: 5");
-            topN = 5;
-        }
-        return topN;
+    public static void printEntryMessage() {
+        System.out.println("""
+
+                       __       ___   ____    ____  ___             ___      .______    __         ___      .__   __.      ___       __      ____    ____  ________   _______ .______       __   __   __ \s
+                      |  |     /   \\  \\   \\  /   / /   \\           /   \\     |   _  \\  |  |       /   \\     |  \\ |  |     /   \\     |  |     \\   \\  /   / |       /  |   ____||   _  \\     |  | |  | |  |\s
+                      |  |    /  ^  \\  \\   \\/   / /  ^  \\         /  ^  \\    |  |_)  | |  |      /  ^  \\    |   \\|  |    /  ^  \\    |  |      \\   \\/   /  `---/  /   |  |__   |  |_)  |    |  | |  | |  |\s
+                .--.  |  |   /  /_\\  \\  \\      / /  /_\\  \\       /  /_\\  \\   |   ___/  |  |     /  /_\\  \\   |  . `  |   /  /_\\  \\   |  |       \\_    _/      /  /    |   __|  |      /     |  | |  | |  |\s
+                |  `--'  |  /  _____  \\  \\    / /  _____  \\     /  _____  \\  |  |      |  |    /  _____  \\  |  |\\   |  /  _____  \\  |  `----.    |  |       /  /----.|  |____ |  |\\  \\----.|__| |__| |__|\s
+                 \\______/  /__/     \\__\\  \\__/ /__/     \\__\\   /__/     \\__\\ | _|      |__|   /__/     \\__\\ |__| \\__| /__/     \\__\\ |_______|    |__|      /________||_______|| _| `._____|(__) (__) (__)\s
+                                                                                                                                                                                                         \s
+                """);
     }
 
-    public static void printModulesNumberResults(List<Module> modules) {
+    public static void printModulesNumberResults(List<?> modules) {
         System.out.println("Number of Modules: " + modules.size());
     }
 

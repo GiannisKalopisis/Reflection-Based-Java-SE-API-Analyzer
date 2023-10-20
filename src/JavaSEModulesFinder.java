@@ -1,25 +1,23 @@
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class JavaModulesFinder {
+public class JavaSEModulesFinder {
 
-    private final Set<Module> allModule;
     private final List<Module> apiModuleList;
     private final Comparator<Module> moduleReferenceComparator;
 
-    public JavaModulesFinder() {
-        this.allModule = ModuleLayer.boot().modules();
-        this.apiModuleList = findUniqueAPIModules();
+    public JavaSEModulesFinder() {
+//        this.apiModuleList = findUniqueAPIModules(ModuleLayer.boot().modules());
+        this.apiModuleList = new ArrayList<>();
         this.moduleReferenceComparator = Comparator.comparing(Module::getName);
     }
 
-    private List<Module> findUniqueAPIModules() {
-        return allModule
+    public List<Module> findUniqueAPIModules(Set<Module> allModules) {
+        allModules
                 .stream()
                 .filter(module -> module.getName().startsWith("java.") || module.getName().startsWith("javax."))    //.map(Module::getName)
-                .collect(Collectors.toCollection(ArrayList::new));    //.toList(); creates ImmutableCollection and sort do not work
+                .forEach(this.apiModuleList::add);    //.toList(); creates ImmutableCollection and sort do not work
+        return this.apiModuleList;
     }
 
     public void sortModules() {
