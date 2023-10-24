@@ -61,14 +61,15 @@ public class Main {
 //            classesToAnalyze.add(Class.forName("java.text.spi.DecimalFormatSymbolsProvider"));
 //            classesToAnalyze.add(Class.forName("java.text.spi.NumberFormatProvider"));
 //            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
-        classesToAnalyze.add(MyClass.class);
+        classesToAnalyze.add(TestClass1.class);
+        classesToAnalyze.add(TestClass2.class);
 
         JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
-        Map<Class<?>, Integer> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
+        Map<Class<?>, Set<Class<?>>> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
 
         System.out.println("Polymorphic degrees:");
-        for (Map.Entry<Class<?>, Integer> entry : polymorphicDegrees.entrySet()) {
-            System.out.println(entry.getKey().getName() + ": " + entry.getValue());
+        for (Map.Entry<Class<?>, Set<Class<?>>> entry : polymorphicDegrees.entrySet()) {
+            System.out.println(entry.getKey().getName() + ": " + entry.getValue().size());
         }
 
 //        javaSEFinder.printModulePackageMap();
