@@ -1,0 +1,3 @@
+interface ThirdInterface {
+    void someMethod();
+}

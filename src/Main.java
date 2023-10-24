@@ -49,29 +49,26 @@ public class Main {
 
 
         List<Class<?>> classesToAnalyze = new ArrayList<>();
-        try {
-            classesToAnalyze.add(Class.forName("java.lang.String"));
-            classesToAnalyze.add(Class.forName("java.lang.Double"));
-            classesToAnalyze.add(Class.forName("java.lang.Integer"));
-            classesToAnalyze.add(Class.forName("java.lang.Float"));
-            classesToAnalyze.add(Class.forName("java.text.DateFormat$Field"));
-            classesToAnalyze.add(Class.forName("java.text.DateFormatSymbols"));
-            classesToAnalyze.add(Class.forName("java.text.DecimalFormatSymbols"));
-            classesToAnalyze.add(Class.forName("java.text.NumberFormat$Field"));
-            classesToAnalyze.add(Class.forName("java.text.spi.DateFormatSymbolsProvider"));
-            classesToAnalyze.add(Class.forName("java.text.spi.DecimalFormatSymbolsProvider"));
-            classesToAnalyze.add(Class.forName("java.text.spi.NumberFormatProvider"));
-            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
+        //            classesToAnalyze.add(Class.forName("java.lang.String"));
+//            classesToAnalyze.add(Class.forName("java.lang.Double"));
+//            classesToAnalyze.add(Class.forName("java.lang.Integer"));
+//            classesToAnalyze.add(Class.forName("java.lang.Float"));
+//            classesToAnalyze.add(Class.forName("java.text.DateFormat$Field"));
+//            classesToAnalyze.add(Class.forName("java.text.DateFormatSymbols"));
+//            classesToAnalyze.add(Class.forName("java.text.DecimalFormatSymbols"));
+//            classesToAnalyze.add(Class.forName("java.text.NumberFormat$Field"));
+//            classesToAnalyze.add(Class.forName("java.text.spi.DateFormatSymbolsProvider"));
+//            classesToAnalyze.add(Class.forName("java.text.spi.DecimalFormatSymbolsProvider"));
+//            classesToAnalyze.add(Class.forName("java.text.spi.NumberFormatProvider"));
+//            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
+        classesToAnalyze.add(MyClass.class);
 
-            JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
-            Map<Class<?>, Integer> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
+        JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
+        Map<Class<?>, Integer> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
 
-            System.out.println("Polymorphic degrees:");
-            for (Map.Entry<Class<?>, Integer> entry : polymorphicDegrees.entrySet()) {
-                System.out.println(entry.getKey().getName() + ": " + entry.getValue());
-            }
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        System.out.println("Polymorphic degrees:");
+        for (Map.Entry<Class<?>, Integer> entry : polymorphicDegrees.entrySet()) {
+            System.out.println(entry.getKey().getName() + ": " + entry.getValue());
         }
 
 //        javaSEFinder.printModulePackageMap();
