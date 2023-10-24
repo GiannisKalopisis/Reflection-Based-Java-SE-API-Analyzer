@@ -1,14 +1,14 @@
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JavaSEPolymorphicTypeFinder {
 
     private final List<Class<?>> classesToAnalyze;
     private final Map<Class<?>, Integer> polymorphicDegrees;
+    private final Set<Class<?>> processedInterfaces;
 
     public JavaSEPolymorphicTypeFinder(List<Class<?>> classesToAnalyze) {
         this.polymorphicDegrees = new HashMap<>();
+        this.processedInterfaces = new HashSet<>();
         this.classesToAnalyze = classesToAnalyze;
     }
 
@@ -19,26 +19,22 @@ public class JavaSEPolymorphicTypeFinder {
         return polymorphicDegrees;
     }
 
-    private int calculatePolymorphicDegreesRecursively(Class<?> clazz) {
-        if (clazz == null || this.polymorphicDegrees.containsKey(clazz)) {
-            return clazz == null ? 0 : this.polymorphicDegrees.getOrDefault(clazz, 0);
+    private Set<Class<?>> calculatePolymorphicDegreesRecursively(Class<?> clazz) {
+        Set<Class<?>> currentSet = new HashSet<>();
+        if (clazz == null) {
+            return currentSet;
         }
 
-        int superclassesCount = calculatePolymorphicDegreesRecursively(clazz.getSuperclass());
-        int interfacesCount = 0;
-
+        currentSet.addAll(calculatePolymorphicDegreesRecursively(clazz.getSuperclass()));
         for (Class<?> iface : clazz.getInterfaces()) {
-            interfacesCount += calculatePolymorphicDegreesRecursively(iface);
+            Set<Class<?>> interfacesSet = calculatePolymorphicDegreesRecursively(iface);
+            currentSet.addAll(interfacesSet);
         }
 
-        int polymorphicDegree = 1 + superclassesCount + interfacesCount;
+        currentSet.add(clazz);
 
-        this.polymorphicDegrees.put(clazz, this.polymorphicDegrees.getOrDefault(clazz, 0) + polymorphicDegree);
+        this.polymorphicDegrees.put(clazz, currentSet.size());
 
-        return polymorphicDegree;
-    }
-
-    private Map<Class<?>, Integer> getPolymorphicDegrees() {
-        return this.polymorphicDegrees;
+        return currentSet;
     }
 }
