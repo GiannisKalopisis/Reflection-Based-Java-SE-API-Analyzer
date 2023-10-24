@@ -1,69 +1,81 @@
-import java.lang.module.ModuleFinder;
-import java.lang.module.ModuleReference;
-import java.lang.reflect.Type;
 import java.util.*;
 
-import java.lang.Module;
-import java.util.List;
-import java.util.stream.Collectors; // Import the Collectors class
 
 public class Main {
+
     public static void main(String[] args) {
-        IOHelper.printEntryMessage();
 
-        int topN = Utils.topNParameterParser(args);
+//        int topN = Utils.topNParameterParser(args);
 
-        JavaSEModulesFinder javaModulesFinder = new JavaSEModulesFinder();
-        List<Module> modulesList = javaModulesFinder.findUniqueAPIModules(ModuleLayer.boot().modules());
-        javaModulesFinder.sortModules();
+//        JavaSEFinder javaSEFinder = new JavaSEFinder();
+//        javaSEFinder.findUniqueModules();
+//        javaSEFinder.findPackagesPerModule();
+//        javaSEFinder.findPackages();
 
-        ModuleFinder finder = ModuleFinder.ofSystem();
-        Set<ModuleReference> moduleReferences = finder.findAll();
-        List<ModuleReference> mdlRef = moduleReferences.stream()
-                .filter(moduleReference ->
-                        (moduleReference.descriptor().name().startsWith("java.") ||
-                                moduleReference.descriptor().name().startsWith("javax.")) &&
-                                !moduleReference.descriptor().name().contains("smartcardio"))
-                .sorted(Comparator.comparing(moduleReference -> moduleReference.descriptor().name()))
-                .toList();
+        List<String> test = new ArrayList<>();
+        test.add("java.lang.String");
+        test.add("java.lang.Integer");
+        test.add("java.lang.Double");
+        test.add("java.lang.Float");
+        Set<Class<?>> classSet = new HashSet<>();
+        Map<Class<?>, Integer> polymorphicCounter = new HashMap<>();
 
-//        Utils.sortList(mdlRef, Comparator.comparing(m -> m.descriptor().name()));
-
-        List<String> frontierPackages = mdlRef
-                .stream()
-                .flatMap(module -> module.descriptor().packages().stream())
-                .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax."))
-                .collect(Collectors.toCollection(ArrayList::new));
-
-//        Utils.sortList(frontierPackages, Comparator.naturalOrder());
-        List<Type> testGenericSuperclass = new ArrayList<>();
-        for (ModuleReference value : mdlRef) {
-            List<ModuleReference> test = new ArrayList<>(Collections.singleton(value));
-            List<String> tempPkgList = test.stream()
-                    .flatMap(module -> module.descriptor().packages().stream())
-                    .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax.") || pkg.startsWith("org."))
-                    .collect(Collectors.toCollection(ArrayList::new));
-            Utils.sortList(tempPkgList, Comparator.naturalOrder());
-            System.out.println("Module \"" + value.descriptor().name() + "\"");
-            for (String s : tempPkgList) {
-                System.out.println("\t" + s);
-//                Package pkg = Package.getPackage(s);
-//                Class<?> cls = pkg.getClass();
-//                Collections.addAll(testGenericSuperclass, cls.getGenericInterfaces());
+        for (String className : test) {
+            try {
+                classSet.add(Class.forName(className));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Class not found: " + className);
             }
-            System.out.println("--------------------------------------\n");
         }
 
-//            Package p = Package.getPackage(packageName);
+        for (Class<?> clazz : classSet) {
+            polymorphicCounter.put(clazz, 0);
+        }
 
-        System.out.println("\npackages: " + frontierPackages.size());
+        for (Class<?> clazz : classSet) {
+            Class<?> superClass = clazz.getSuperclass();
+            Class<?>[] interfaces = clazz.getInterfaces();
+            System.out.println("\n" + clazz.getName() + " extends " + superClass.getName());
+            for (Class<?> anInterface : interfaces) {
+                System.out.println("\t" + clazz.getName() + " implements " + anInterface.getName());
+            }
+        }
 
-//        for (Type type: testGenericSuperclass) {
-//            System.out.println(type.getTypeName());
-//        }
+        System.out.println();
+        classSet.forEach(System.out::println);
+        System.out.println();
+        System.out.println();
+        System.out.println();
 
 
-//        IOHelper.printModulesToTerminal(javaModulesFinder.getApiModuleList());
-        IOHelper.printModulesNumberResults(mdlRef);
+        List<Class<?>> classesToAnalyze = new ArrayList<>();
+        try {
+            classesToAnalyze.add(Class.forName("java.lang.String"));
+            classesToAnalyze.add(Class.forName("java.lang.Double"));
+            classesToAnalyze.add(Class.forName("java.lang.Integer"));
+            classesToAnalyze.add(Class.forName("java.lang.Float"));
+            classesToAnalyze.add(Class.forName("java.text.DateFormat$Field"));
+            classesToAnalyze.add(Class.forName("java.text.DateFormatSymbols"));
+            classesToAnalyze.add(Class.forName("java.text.DecimalFormatSymbols"));
+            classesToAnalyze.add(Class.forName("java.text.NumberFormat$Field"));
+            classesToAnalyze.add(Class.forName("java.text.spi.DateFormatSymbolsProvider"));
+            classesToAnalyze.add(Class.forName("java.text.spi.DecimalFormatSymbolsProvider"));
+            classesToAnalyze.add(Class.forName("java.text.spi.NumberFormatProvider"));
+            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
+
+            JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
+            Map<Class<?>, Integer> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
+
+            System.out.println("Polymorphic degrees:");
+            for (Map.Entry<Class<?>, Integer> entry : polymorphicDegrees.entrySet()) {
+                System.out.println(entry.getKey().getName() + ": " + entry.getValue());
+            }
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+//        javaSEFinder.printModulePackageMap();
+//
+//        IOHelper.printModulesNumberResults(javaSEFinder.getModuleList());
     }
 }

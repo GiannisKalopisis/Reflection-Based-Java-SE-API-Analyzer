@@ -1,3 +1,8 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class IOHelper {
@@ -20,8 +25,28 @@ public class IOHelper {
     }
 
     public static void printModulesToTerminal(List<Module> modules) {
-        for (Module module : modules) {
-            System.out.println(module.getName());
+        modules.forEach(module -> System.out.println(module.getName()));
+    }
+
+    public static ArrayList<String> readInputFile(String inputFilePath) {
+        ArrayList<String> inputData = new ArrayList<>();
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
+            String line = reader.readLine();
+            while (line != null) {
+                inputData.add(line);
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch (FileNotFoundException e) {
+            System.err.println("Couldn't find file " + inputFilePath);
+            e.printStackTrace();
+            System.exit(-1);
+        } catch (IOException e) {
+            System.err.println("I/O error while trying to read from file " + inputFilePath);
+            e.printStackTrace();
+            System.exit(-1);
         }
+        return inputData;
     }
 }
