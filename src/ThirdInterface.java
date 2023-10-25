@@ -1,3 +1,3 @@
 interface ThirdInterface {
-    void someMethod();
+    void someMethod(String test);
 }

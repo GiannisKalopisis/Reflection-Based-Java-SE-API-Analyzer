@@ -61,16 +61,28 @@ public class Main {
 //            classesToAnalyze.add(Class.forName("java.text.spi.DecimalFormatSymbolsProvider"));
 //            classesToAnalyze.add(Class.forName("java.text.spi.NumberFormatProvider"));
 //            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
-        classesToAnalyze.add(TestClass1.class);
-        classesToAnalyze.add(TestClass2.class);
+//        classesToAnalyze.add(TestClass1.class);
+//        classesToAnalyze.add(TestClass2.class);
+        classesToAnalyze.add(MyClass.class);
+        classesToAnalyze.add(CombinedInterface.class);
 
         JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
         Map<Class<?>, Set<Class<?>>> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
+        Map<Class<?>, Set<Class<?>>> sortedMap = Utils.sortByCollectionSizeDescending(polymorphicDegrees);
 
         System.out.println("Polymorphic degrees:");
-        for (Map.Entry<Class<?>, Set<Class<?>>> entry : polymorphicDegrees.entrySet()) {
+        for (Map.Entry<Class<?>, Set<Class<?>>> entry : sortedMap.entrySet()) {
             System.out.println(entry.getKey().getName() + ": " + entry.getValue().size());
         }
+
+//        System.out.println("\nReceived methods:");
+//        Map<Class<?>, List<MethodInfo>> receivedMethods = polymorphicTypeFinder.getReceivedMethods();
+//        for (Map.Entry<Class<?>, List<MethodInfo>> entry : receivedMethods.entrySet()) {
+//            System.out.println(entry.getKey().getName() + ": ");
+//            for (MethodInfo methodInfo : entry.getValue()) {
+//                System.out.println("\t" + methodInfo.toString());
+//            }
+//        }
 
 //        javaSEFinder.printModulePackageMap();
 //
