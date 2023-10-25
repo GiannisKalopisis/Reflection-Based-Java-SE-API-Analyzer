@@ -1,0 +1,70 @@
+java.lang.Object:
+	finalize, [], java.lang.Object
+	toString, [], java.lang.Object
+	clone, [], java.lang.Object
+	notify, [], java.lang.Object
+	wait, [long, int], java.lang.Object
+	wait, [], java.lang.Object
+	wait, [long], java.lang.Object
+	getClass, [], java.lang.Object
+	hashCode, [], java.lang.Object
+	equals, [java.lang.Object], java.lang.Object
+	notifyAll, [], java.lang.Object
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+CombinedInterface:
+	additionalMethod, [], CombinedInterface
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+FirstInterface:
+	anotherMethod, [], FirstInterface
+	someMethod, [], FirstInterface
+	additionalMethod, [], CombinedInterface
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+SecondInterface:
+	yetAnotherMethod, [], SecondInterface
+	additionalMethod, [], CombinedInterface
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+MyClass:
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+ThirdInterface:
+	someMethod, [java.lang.String], ThirdInterface
+	anotherMethod, [], FirstInterface
+	someMethod, [], FirstInterface
+	additionalMethod, [], CombinedInterface
+	anotherMethod, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+	yetAnotherMethod, [], SecondInterface
