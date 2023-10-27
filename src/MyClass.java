@@ -34,6 +34,10 @@ class MyClass implements CombinedInterface{
 //
 //    }
 
+    public void foo() {
+
+    }
+
     public void toString(int test, int test2) {
     }
 

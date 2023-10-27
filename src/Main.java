@@ -88,14 +88,14 @@ public class Main {
             System.out.println(entry.getKey().getName() + ": " + entry.getValue().size());
         }
 
-//        System.out.println("\nReceived methods:");
-//        Map<Class<?>, List<MethodInfo>> receivedMethods = polymorphicTypeFinder.getReceivedMethods();
-//        for (Map.Entry<Class<?>, List<MethodInfo>> entry : receivedMethods.entrySet()) {
-//            System.out.println(entry.getKey().getName() + ": ");
-//            for (MethodInfo methodInfo : entry.getValue()) {
-//                System.out.println("\t" + methodInfo.toString());
-//            }
-//        }
+        System.out.println("\nReceived methods:");
+        Map<Class<?>, List<MethodInfo>> receivedMethods = polymorphicTypeFinder.getReceivedMethods();
+        for (Map.Entry<Class<?>, List<MethodInfo>> entry : receivedMethods.entrySet()) {
+            System.out.println(entry.getKey().getName() + ": ");
+            for (MethodInfo methodInfo : entry.getValue()) {
+                System.out.println("\t" + methodInfo.toString());
+            }
+        }
 
 //        javaSEFinder.printModulePackageMap();
 //

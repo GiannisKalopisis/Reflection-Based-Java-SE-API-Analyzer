@@ -1,4 +1,3 @@
-import javax.lang.model.element.PackageElement;
 import java.lang.module.ModuleFinder;
 import java.lang.module.ModuleReference;
 import java.util.*;
@@ -70,6 +69,8 @@ public class JavaSEFinder {
         return moduleList;
     }
 
-
+    public List<String> getPackageList() {
+        return packageList;
+    }
 
 }

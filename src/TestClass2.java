@@ -11,4 +11,8 @@ public class TestClass2 extends MyClass implements FirstInterface{
 
     protected void toString(int test, String test2) {
     }
+
+    public void foo() {
+        System.out.println("Foo");
+    }
 }

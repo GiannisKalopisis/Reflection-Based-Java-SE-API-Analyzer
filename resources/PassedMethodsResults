@@ -1,4 +1,13 @@
+Received methods:
 java.lang.Object:
+	anotherMethod, [], MyClass
+	foo, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
 	finalize, [], java.lang.Object
 	toString, [], java.lang.Object
 	clone, [], java.lang.Object
@@ -10,61 +19,59 @@ java.lang.Object:
 	hashCode, [], java.lang.Object
 	equals, [java.lang.Object], java.lang.Object
 	notifyAll, [], java.lang.Object
-	anotherMethod, [], MyClass
-	toString, [int, int], MyClass
-	additionalMethod, [], MyClass
-	yetAnotherMethod, [], MyClass
-	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
-	someMethod, [], MyClass
 CombinedInterface:
-	additionalMethod, [], CombinedInterface
 	anotherMethod, [], MyClass
+	foo, [], MyClass
 	toString, [int, int], MyClass
 	additionalMethod, [], MyClass
 	yetAnotherMethod, [], MyClass
 	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
 	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
+	additionalMethod, [], CombinedInterface
 FirstInterface:
+	anotherMethod, [], MyClass
+	foo, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
+	additionalMethod, [], CombinedInterface
 	anotherMethod, [], FirstInterface
 	someMethod, [], FirstInterface
-	additionalMethod, [], CombinedInterface
-	anotherMethod, [], MyClass
-	toString, [int, int], MyClass
-	additionalMethod, [], MyClass
-	yetAnotherMethod, [], MyClass
-	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
-	someMethod, [], MyClass
 SecondInterface:
-	yetAnotherMethod, [], SecondInterface
-	additionalMethod, [], CombinedInterface
 	anotherMethod, [], MyClass
+	foo, [], MyClass
 	toString, [int, int], MyClass
 	additionalMethod, [], MyClass
 	yetAnotherMethod, [], MyClass
 	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
 	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
+	additionalMethod, [], CombinedInterface
+	yetAnotherMethod, [], SecondInterface
 MyClass:
 	anotherMethod, [], MyClass
+	foo, [], MyClass
 	toString, [int, int], MyClass
 	additionalMethod, [], MyClass
 	yetAnotherMethod, [], MyClass
 	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
 	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
 ThirdInterface:
-	someMethod, [java.lang.String], ThirdInterface
+	yetAnotherMethod, [], SecondInterface
+	anotherMethod, [], MyClass
+	foo, [], MyClass
+	toString, [int, int], MyClass
+	additionalMethod, [], MyClass
+	yetAnotherMethod, [], MyClass
+	yetAnotherMethod, [java.lang.String], MyClass
+	someMethod, [], MyClass
+	someMethod, [java.lang.String], MyClass
+	additionalMethod, [], CombinedInterface
 	anotherMethod, [], FirstInterface
 	someMethod, [], FirstInterface
-	additionalMethod, [], CombinedInterface
-	anotherMethod, [], MyClass
-	toString, [int, int], MyClass
-	additionalMethod, [], MyClass
-	yetAnotherMethod, [], MyClass
-	yetAnotherMethod, [java.lang.String], MyClass
-	someMethod, [java.lang.String], MyClass
-	someMethod, [], MyClass
-	yetAnotherMethod, [], SecondInterface
+	someMethod, [java.lang.String], ThirdInterface

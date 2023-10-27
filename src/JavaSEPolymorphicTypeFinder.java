@@ -1,5 +1,7 @@
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JavaSEPolymorphicTypeFinder {
 
@@ -76,16 +78,20 @@ public class JavaSEPolymorphicTypeFinder {
         return concatMethods;
     }
 
-    private List<MethodInfo> getMethodsParametersTypes(Set<Method> methodSet) {
-        List<MethodInfo> methodInfoList = new ArrayList<>();
-        for (Method method : methodSet) {
-            List<String> methodParametersTypes = new ArrayList<>();
-            for (Class<?> parameterType : method.getParameterTypes()) {
-                methodParametersTypes.add(parameterType.getName());
-            }
-            methodInfoList.add(new MethodInfo(method.getName(), methodParametersTypes, method.getDeclaringClass().getName()));
-        }
-        return methodInfoList;
+    public static List<MethodInfo> extractMethodsSignature(Set<Method> methodSet) {
+        return methodSet.stream()
+                .map(method -> new MethodInfo(
+                        method.getName(),
+                        parameterTypesToStringList(method.getParameterTypes()),
+                        method.getDeclaringClass().getName()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    private static List<String> parameterTypesToStringList(Class<?>[] parameterTypes) {
+        return Arrays.stream(parameterTypes)
+                .map(Class::getName)
+                .collect(Collectors.toList());
     }
 
     public Map<Class<?>, List<MethodInfo>> getReceivedMethods() {
