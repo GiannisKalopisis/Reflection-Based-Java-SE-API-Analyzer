@@ -63,8 +63,21 @@ public class Main {
 //            classesToAnalyze.add(Class.forName("java.util.AbstractList$Itr"));
 //        classesToAnalyze.add(TestClass1.class);
 //        classesToAnalyze.add(TestClass2.class);
-        classesToAnalyze.add(MyClass.class);
-        classesToAnalyze.add(CombinedInterface.class);
+//        classesToAnalyze.add(MyClass.class);
+//        classesToAnalyze.add(CombinedInterface.class);
+
+        classesToAnalyze.add(c1.class);
+        classesToAnalyze.add(c2.class);
+        classesToAnalyze.add(c3.class);
+        classesToAnalyze.add(c4.class);
+        classesToAnalyze.add(c5.class);
+        classesToAnalyze.add(c6.class);
+        classesToAnalyze.add(in1.class);
+//        try {
+//            classesToAnalyze.add(Class.forName("java.lang.reflect.Method"));
+//        } catch (ClassNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
 
         JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
         Map<Class<?>, Set<Class<?>>> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();

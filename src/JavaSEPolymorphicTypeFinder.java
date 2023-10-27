@@ -33,20 +33,20 @@ public class JavaSEPolymorphicTypeFinder {
             return currentSet;
         }
 
-        Set<Method> currentClassMethods = new HashSet<>(Arrays.asList(clazz.getDeclaredMethods()));
-        List<MethodInfo> currentClassMethodsInfo;
-        if (this.receivedMethods.get(clazz) == null || this.receivedMethods.get(clazz).isEmpty()) {
-            currentClassMethodsInfo = getMethodsParametersTypes(currentClassMethods);
-        } else {
-            currentClassMethodsInfo = this.receivedMethods.get(clazz);
-        }
-        List<MethodInfo> passingMethods = concatMethodsInfo(subClassMethods, currentClassMethodsInfo);
-        this.receivedMethods.put(clazz, passingMethods);
+//        Set<Method> currentClassMethods = new HashSet<>(Arrays.asList(clazz.getDeclaredMethods()));
+//        List<MethodInfo> currentClassMethodsInfo;
+//        if (this.receivedMethods.get(clazz) == null || this.receivedMethods.get(clazz).isEmpty()) {
+//            currentClassMethodsInfo = getMethodsParametersTypes(currentClassMethods);
+//        } else {
+//            currentClassMethodsInfo = this.receivedMethods.get(clazz);
+//        }
+//        List<MethodInfo> passingMethods = concatMethodsInfo(subClassMethods, currentClassMethodsInfo);
+//        this.receivedMethods.put(clazz, passingMethods);
 
         // Add all the superclasses and interfaces to currentSet
-        currentSet.addAll(calculatePolymorphicDegreesRecursively(clazz.getSuperclass(), passingMethods));
+        currentSet.addAll(calculatePolymorphicDegreesRecursively(clazz.getSuperclass(), null));
         for (Class<?> iface : clazz.getInterfaces()) {
-            currentSet.addAll(calculatePolymorphicDegreesRecursively(iface, passingMethods));
+            currentSet.addAll(calculatePolymorphicDegreesRecursively(iface, null));
         }
 
         // Add current class to currentSet
