@@ -1,9 +1,5 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class IOHelper {
 
@@ -20,33 +16,10 @@ public class IOHelper {
                 """);
     }
 
-    public static void printModulesNumberResults(List<?> modules) {
-        System.out.println("Number of Modules: " + modules.size());
-    }
-
-    public static void printModulesToTerminal(List<Module> modules) {
-        modules.forEach(module -> System.out.println(module.getName()));
-    }
-
-    public static ArrayList<String> readInputFile(String inputFilePath) {
-        ArrayList<String> inputData = new ArrayList<>();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
-            String line = reader.readLine();
-            while (line != null) {
-                inputData.add(line);
-                line = reader.readLine();
-            }
-            reader.close();
-        } catch (FileNotFoundException e) {
-            System.err.println("Couldn't find file " + inputFilePath);
-            e.printStackTrace();
-            System.exit(-1);
-        } catch (IOException e) {
-            System.err.println("I/O error while trying to read from file " + inputFilePath);
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        return inputData;
+    public static void printModulesToTerminal(Map<Class<?>, Set<Class<?>>> modules, int topN) {
+        modules.entrySet()
+                .stream()
+                .limit(topN <= 0 ? modules.size() : Math.min(topN, modules.size())) // Math.min(topN, modules.size()) is used to avoid IndexOutOfBoundsException
+                .forEach(module -> System.out.println(module.getKey().getName() + ": " + module.getValue().size()));
     }
 }
