@@ -4,12 +4,12 @@ public class MethodInfo {
 
     private String methodName;
     private List<String> methodParametersTypes;
-    private String className;
+    private Class<?> classInfo;
 
-    public MethodInfo(String methodName, List<String> methodParametersTypes, String className) {
+    public MethodInfo(String methodName, List<String> methodParametersTypes, Class<?> classInfo) {
         this.methodName = methodName;
         this.methodParametersTypes = methodParametersTypes;
-        this.className = className;
+        this.classInfo = classInfo;
     }
 
     public String getMethodName() {
@@ -20,12 +20,12 @@ public class MethodInfo {
         return methodParametersTypes;
     }
 
-    public String getClassName() {
-        return className;
+    public Class<?> getClassInfo() {
+        return classInfo;
     }
 
     @Override
     public String toString() {
-        return methodName + ", " + methodParametersTypes + ", " + className;
+        return methodName + ", " + methodParametersTypes + ", " + classInfo;
     }
 }

@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class Main {
@@ -73,32 +75,42 @@ public class Main {
         classesToAnalyze.add(c5.class);
         classesToAnalyze.add(c6.class);
         classesToAnalyze.add(in1.class);
-//        try {
-//            classesToAnalyze.add(Class.forName("java.lang.reflect.Method"));
-//        } catch (ClassNotFoundException e) {
-//            throw new RuntimeException(e);
-//        }
 
         JavaSEPolymorphicTypeFinder polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(classesToAnalyze);
-        Map<Class<?>, Set<Class<?>>> polymorphicDegrees = polymorphicTypeFinder.calculatePolymorphicDegrees();
-        Map<Class<?>, Set<Class<?>>> sortedMap = Utils.sortByCollectionSizeDescending(polymorphicDegrees);
+        Map<Class<?>, Set<Class<?>>> classPolymorphicDegreeMap = polymorphicTypeFinder.calculatePolymorphicDegrees();
+        Map<Class<?>, Set<Class<?>>> sortedMap = Utils.sortByCollectionSizeDescending(classPolymorphicDegreeMap);
 
-        System.out.println("Polymorphic degrees:");
-        for (Map.Entry<Class<?>, Set<Class<?>>> entry : sortedMap.entrySet()) {
-            System.out.println(entry.getKey().getName() + ": " + entry.getValue().size());
-        }
+
+        IOHelper.printModulesToTerminal(sortedMap, 3);
+
+        JavaSEOverloadFinder overloadFinder = new JavaSEOverloadFinder(polymorphicTypeFinder.getTopLvlReceivedMethods(), classPolymorphicDegreeMap);
+//        overloadFinder.groupByMethodName();
+        overloadFinder.setTopLvlReceivedMethods(reverseMapKeys(overloadFinder.getTopLvlReceivedMethods()));
+        overloadFinder.calculateOverloadDegree();
+
+
 
         System.out.println("\nReceived methods:");
-        Map<Class<?>, List<MethodInfo>> receivedMethods = polymorphicTypeFinder.getReceivedMethods();
-        for (Map.Entry<Class<?>, List<MethodInfo>> entry : receivedMethods.entrySet()) {
-            System.out.println(entry.getKey().getName() + ": ");
-            for (MethodInfo methodInfo : entry.getValue()) {
-                System.out.println("\t" + methodInfo.toString());
-            }
-        }
+//        Map<Class<?>, List<MethodInfo>> receivedMethods = polymorphicTypeFinder.getTopLvlReceivedMethods();
+//        for (Map.Entry<Class<?>, List<MethodInfo>> entry : receivedMethods.entrySet()) {
+//            System.out.println(entry.getKey().getName() + ": ");
+//            for (MethodInfo methodInfo : entry.getValue()) {
+//                System.out.println("\t" + methodInfo.toString());
+//            }
+//        }
 
 //        javaSEFinder.printModulePackageMap();
 //
 //        IOHelper.printModulesNumberResults(javaSEFinder.getModuleList());
+    }
+
+    public static <K, V> Map<K, V> reverseMapKeys(Map<K, V> source) {
+        Map<K, V> result = new LinkedHashMap<>();
+        List<K> keys = new ArrayList<>(source.keySet());
+        Collections.reverse(keys);
+        for (K key : keys) {
+            result.put(key, source.get(key));
+        }
+        return result;
     }
 }

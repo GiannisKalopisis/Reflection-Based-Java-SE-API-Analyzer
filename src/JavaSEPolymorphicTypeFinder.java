@@ -1,7 +1,6 @@
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JavaSEPolymorphicTypeFinder {
 
@@ -9,11 +8,11 @@ public class JavaSEPolymorphicTypeFinder {
 
     private final List<Class<?>> classesToAnalyze;
     private final Map<Class<?>, Set<Class<?>>> polymorphicDegrees;
-    private final Map<Class<?>, List<MethodInfo>> receivedMethods;
+    private final Map<Class<?>, List<MethodInfo>> topLvlReceivedMethods;
 
     public JavaSEPolymorphicTypeFinder(List<Class<?>> classesToAnalyze) {
         this.polymorphicDegrees = new HashMap<>();
-        this.receivedMethods = new HashMap<>();
+        this.topLvlReceivedMethods = new HashMap<>();
         this.classesToAnalyze = classesToAnalyze;
     }
 
@@ -25,65 +24,101 @@ public class JavaSEPolymorphicTypeFinder {
     }
 
     private Set<Class<?>> calculatePolymorphicDegreesRecursively(Class<?> clazz, List<MethodInfo> subClassMethods) {
-        Set<Class<?>> currentSet = new LinkedHashSet<>();
-
+        Set<Class<?>> inheritanceClassChain = new LinkedHashSet<>();
         // Not work for passing over methods
 //        if (clazz == null || polymorphicDegrees.containsKey(clazz)) {
-//            return clazz == null ? currentSet : polymorphicDegrees.get(clazz);
+//            return clazz == null ? inheritanceClassChain : polymorphicDegrees.get(clazz);
 //        }
         if (clazz == null) {
-            return currentSet;
+            return inheritanceClassChain;
         }
 
-//        Set<Method> currentClassMethods = new HashSet<>(Arrays.asList(clazz.getDeclaredMethods()));
-//        List<MethodInfo> currentClassMethodsInfo;
-//        if (this.receivedMethods.get(clazz) == null || this.receivedMethods.get(clazz).isEmpty()) {
-//            currentClassMethodsInfo = getMethodsParametersTypes(currentClassMethods);
-//        } else {
-//            currentClassMethodsInfo = this.receivedMethods.get(clazz);
-//        }
-//        List<MethodInfo> passingMethods = concatMethodsInfo(subClassMethods, currentClassMethodsInfo);
-//        this.receivedMethods.put(clazz, passingMethods);
+        Method[] currentClassMethods = clazz.getDeclaredMethods();
+        List<MethodInfo> passingMethods = concatMethodsAndExcludeOverride(subClassMethods, extractMethodsSignature(currentClassMethods));
 
-        // Add all the superclasses and interfaces to currentSet
-        currentSet.addAll(calculatePolymorphicDegreesRecursively(clazz.getSuperclass(), null));
+        // Add all the superclasses and interfaces to inheritanceClassChain
+        inheritanceClassChain.addAll(calculatePolymorphicDegreesRecursively(clazz.getSuperclass(), passingMethods));
         for (Class<?> iface : clazz.getInterfaces()) {
-            currentSet.addAll(calculatePolymorphicDegreesRecursively(iface, null));
+            inheritanceClassChain.addAll(calculatePolymorphicDegreesRecursively(iface, passingMethods));
         }
 
-        // Add current class to currentSet
-        currentSet.add(clazz);
+        if (inheritanceClassChain.isEmpty()) {
+            addTopLvlReceivedMethods(clazz, passingMethods);
+        }
 
-        this.polymorphicDegrees.put(clazz, currentSet);
+        // Add current class to inheritanceClassChain
+        inheritanceClassChain.add(clazz);
 
-        return currentSet;
+        this.polymorphicDegrees.put(clazz, inheritanceClassChain);
+
+        return inheritanceClassChain;
     }
 
-    private List<MethodInfo> concatMethodsInfo(List<MethodInfo> subClassMethods, List<MethodInfo> currentClassMethods) {
-        List<MethodInfo> concatMethods = new ArrayList<>(currentClassMethods);
-        for (MethodInfo methodInfo : subClassMethods) {
-            boolean found = false;
-            for (MethodInfo concatMethod : currentClassMethods) {
-                // If method with same className already exists,
-                // it means that methods of that class already have been added from other path
-                if (methodInfo.getClassName().equals(concatMethod.getClassName())) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                concatMethods.add(methodInfo);
+//    public void addTopLvlReceivedMethods(Class<?> clazz, List<MethodInfo> methods) {
+//        if (!this.topLvlReceivedMethods.containsKey(clazz)) {
+//            this.topLvlReceivedMethods.put(clazz, methods);
+//        } else {
+//            List<MethodInfo> currentList = this.topLvlReceivedMethods.get(clazz);
+//            List<MethodInfo> concatenatedList = new ArrayList<>(currentList);
+//            for (MethodInfo methodInfo : methods) {
+//                boolean isDuplicate = false;
+//                for (MethodInfo concatenatedMethod : currentList) {
+//                    if (concatenatedMethod.getMethodName().equals(methodInfo.getMethodName()) &&
+//                        concatenatedMethod.getMethodParametersTypes().equals(methodInfo.getMethodParametersTypes()) &&
+//                        concatenatedMethod.getClassName().equals(methodInfo.getClassName())) {
+//                        isDuplicate = true;
+//                        break;
+//                    }
+//                }
+//                if (!isDuplicate) {
+//                    concatenatedList.add(methodInfo);
+//                }
+//            }
+//            this.topLvlReceivedMethods.put(clazz, concatenatedList);
+//        }
+//    }
+
+    public void addTopLvlReceivedMethods(Class<?> clazz, List<MethodInfo> methods) {
+        this.topLvlReceivedMethods.computeIfAbsent(clazz, k -> new ArrayList<>())
+                .addAll(methods.stream()
+                        .filter(method ->
+                                this.topLvlReceivedMethods.get(clazz).stream()
+                                        .noneMatch(existing ->
+                                                existing.getMethodName().equals(method.getMethodName()) &&
+                                                existing.getMethodParametersTypes().equals(method.getMethodParametersTypes()) &&
+                                                existing.getClassInfo().getName().equals(method.getClassInfo().getName())
+                                        )
+                        )
+                        .toList()
+                );
+    }
+
+
+    private List<MethodInfo> concatMethodsAndExcludeOverride(List<MethodInfo> subClassMethods, List<MethodInfo> currentClassMethods) {
+        List<MethodInfo> result = new ArrayList<>(currentClassMethods); // In case of override, keeping the highest in inheritance hierarchy chain method
+
+        for (MethodInfo subClassMethod : subClassMethods) {
+            // Must not have the same method name and parameters types
+            boolean isOverridden = currentClassMethods.stream()
+                    .anyMatch(currentClassMethod ->
+                            currentClassMethod.getMethodName().equals(subClassMethod.getMethodName()) &&
+                            currentClassMethod.getMethodParametersTypes().equals(subClassMethod.getMethodParametersTypes())
+                    );
+
+            if (!isOverridden) {
+                result.add(subClassMethod);
             }
         }
-        return concatMethods;
+
+        return result;
     }
 
-    public static List<MethodInfo> extractMethodsSignature(Set<Method> methodSet) {
-        return methodSet.stream()
+    public List<MethodInfo> extractMethodsSignature(Method[] methods) {
+        return Arrays.stream(methods)
                 .map(method -> new MethodInfo(
                         method.getName(),
                         parameterTypesToStringList(method.getParameterTypes()),
-                        method.getDeclaringClass().getName()
+                        method.getDeclaringClass()
                 ))
                 .collect(Collectors.toList());
     }
@@ -94,7 +129,7 @@ public class JavaSEPolymorphicTypeFinder {
                 .collect(Collectors.toList());
     }
 
-    public Map<Class<?>, List<MethodInfo>> getReceivedMethods() {
-        return receivedMethods;
+    public Map<Class<?>, List<MethodInfo>> getTopLvlReceivedMethods() {
+        return topLvlReceivedMethods;
     }
 }
