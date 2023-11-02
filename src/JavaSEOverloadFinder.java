@@ -1,112 +1,78 @@
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class JavaSEOverloadFinder {
 
-    public Map<Class<?>, Map<String, List<MethodInfo>>> getTopLvlReceivedMethods() {
-        return topLvlReceivedMethods;
-    }
-
-    public void setTopLvlReceivedMethods(Map<Class<?>, Map<String, List<MethodInfo>>> testMap) {
-        this.topLvlReceivedMethods = testMap;
-    }
-
-    private Map<Class<?>, Map<String, List<MethodInfo>>> topLvlReceivedMethods;
-    private Map<MethodInfo, Integer> overloadDegreeMap;
+    private final Map<Class<?>, Map<String, List<MethodInfo>>> topLvlReceivedMethods;
+    private final Map <String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName;
     private final Map<Class<?>, Set<Class<?>>> polymorphicDegrees;
 
-    public JavaSEOverloadFinder(Map<Class<?>, List<MethodInfo>> receivedMethods, Map<Class<?>, Set<Class<?>>> polymorphicDegrees) {
-        this.overloadDegreeMap = new HashMap<>();
+    public JavaSEOverloadFinder(Map<Class<?>, Map<String, List<MethodInfo>>> receivedMethods, Map<Class<?>, Set<Class<?>>> polymorphicDegrees) {
         this.polymorphicDegrees = polymorphicDegrees;
-        this.topLvlReceivedMethods = new HashMap<>();
-
-        receivedMethods.forEach((key, value) -> {
-            this.topLvlReceivedMethods.put(key, groupByMethodName(value));
-        });
-    }
-
-    private Map<String, List<MethodInfo>> groupByMethodName(List<MethodInfo> methodInfoList) {
-        Map<String, List<MethodInfo>> methodInfoMap = new HashMap<>();
-
-        for (MethodInfo methodInfo : methodInfoList) {
-            String methodName = methodInfo.getMethodName();
-
-            // Get the list of MethodInfo objects with the same methodName
-            List<MethodInfo> groupList = methodInfoMap.computeIfAbsent(methodName, k -> new ArrayList<>());
-
-            groupList.add(methodInfo);
-        }
-        return methodInfoMap;
+        this.overloadDegreeMapByMethodName = new HashMap<>();
+        this.topLvlReceivedMethods = receivedMethods;
+//        receivedMethods.forEach((key, value) -> this.topLvlReceivedMethods.put(key, Utils.groupByMethodName(value)));
     }
 
     public void calculateOverloadDegree() {
         this.topLvlReceivedMethods.forEach((topLvlClass, groupedMethods) -> {
             groupedMethods.forEach((methodName, methodList) -> {    // i.e (bar, [{bar, [], class1}, {bar, [int, String], class2}]) ->
-                Map<MethodInfo, Boolean> methodFirstDefined = findTopHierarchyMethodDeclarations(methodList);
-                Map<MethodInfo, Integer> overloadDegreeCounter = methodFirstDefined.entrySet()
+                Map<MethodInfo, Boolean> methodTopHierarchyDefined = findTopHierarchyMethodDeclarations(methodList);
+                Map<MethodInfo, Integer> overloadDegreeCounter = methodTopHierarchyDefined.entrySet()
                         .stream()
                         .filter(Map.Entry::getValue)
-                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> 1, (a, b) -> a, HashMap::new));
-                calculateOverloadCounter(methodFirstDefined, overloadDegreeCounter);
+                        .collect(Collectors.toMap(Map.Entry::getKey, entry -> 1, (existingValue, newValue) -> existingValue, HashMap::new));
+
+                calculateOverloadCounter(methodTopHierarchyDefined, overloadDegreeCounter);
                 sumUpSameClassMethods(overloadDegreeCounter);
-                this.overloadDegreeMap = mergeMaps(this.overloadDegreeMap, overloadDegreeCounter);
+                mergeMaps(overloadDegreeCounter);
             });
         });
     }
 
-    // merge maps and check if have same entries with different values (foo -> 1 : from inter1, foo -> 2 : from Object)
-    // keep the biggest value
-    public Map<MethodInfo, Integer> mergeMaps(Map<MethodInfo, Integer> globalOverloadMap,
-                                              Map<MethodInfo, Integer> currentOverloadMap) {
-        Map<MethodInfo, Integer> returnMap = new HashMap<>();
+    public void mergeMaps(Map<MethodInfo, Integer> currentOverloadMap) {
 
-        for (Map.Entry<MethodInfo, Integer> globalEntry : globalOverloadMap.entrySet()) {
-            MethodInfo globalKey = globalEntry.getKey();
-            Integer globalValue = globalEntry.getValue();
-            boolean merged = false;
-
-            for (Map.Entry<MethodInfo, Integer> currentEntry : currentOverloadMap.entrySet()) {
-                MethodInfo currentKey = currentEntry.getKey();
-                Integer currentValue = currentEntry.getValue();
-
-                // If hava same METHOD_NAME and CLASS_NAME, keep the biggest value
-                if (globalKey.getMethodName().equals(currentKey.getMethodName()) && globalKey.getClassInfo().getName().equals(currentKey.getClassInfo().getName())) {
-                    returnMap.put(globalKey, Math.max(globalValue, currentValue));
-                    merged = true;
-                    break;
+        // Iterate through all entries of the current map for the SAME METHOD NAME ONLY
+        // Here will go if entries exists for this method name
+        Map<MethodInfo, Integer> newMapForMethodName = new HashMap<>();
+        String methodName = null;
+        for (Map.Entry<MethodInfo, Integer> currentEntry : currentOverloadMap.entrySet()) {
+            methodName = currentEntry.getKey().getMethodName();
+            Map<MethodInfo, Integer> globalOverloadMap = this.overloadDegreeMapByMethodName.get(currentEntry.getKey().getMethodName());
+            if (globalOverloadMap == null) {
+                this.overloadDegreeMapByMethodName.put(currentEntry.getKey().getMethodName(), currentOverloadMap);
+                return;
+            }
+            // Definitely there have the same MethodName
+            for (Map.Entry<MethodInfo, Integer> globalEntry : globalOverloadMap.entrySet()) {
+                // If they have the same CLASS_NAME, keep the biggest value
+                if (globalEntry.getKey().getClassInfo().getName().equals(currentEntry.getKey().getClassInfo().getName())) {
+                    if (globalEntry.getValue() > currentEntry.getValue()) {
+                        newMapForMethodName.put(globalEntry.getKey(), globalEntry.getValue());
+                    } else {
+                        newMapForMethodName.put(currentEntry.getKey(), currentEntry.getValue());
+                    }
                 }
-                // If hava same METHOD_NAME and different CLASS_NAME
-                else if (globalKey.getMethodName().equals(currentKey.getMethodName()) && !globalKey.getClassInfo().getName().equals(currentKey.getClassInfo().getName())) {
+                // If they have different CLASS_NAME
+                else {
                     // If they have common classes in their hierarchy, keep the entry with the biggest value
-                    if (haveCommonHierarchy(globalKey.getClassInfo(), currentKey.getClassInfo())) {
-                        if (globalValue > currentValue) {
-                            returnMap.put(globalKey, globalValue);
+                    if (haveCommonHierarchy(globalEntry.getKey().getClassInfo(),currentEntry.getKey().getClassInfo())) {
+                        if (globalEntry.getValue() > currentEntry.getValue()) {
+                            newMapForMethodName.put(globalEntry.getKey(), globalEntry.getValue());
                         } else {
-                            returnMap.put(currentKey, currentValue);
+                            newMapForMethodName.put(currentEntry.getKey(), currentEntry.getValue());
                         }
                     }
                     // If they have disjoint sets of hierarchy classes, keep both entries
                     else {
-                        returnMap.put(currentKey, currentValue);
+                        newMapForMethodName.put(currentEntry.getKey(), currentEntry.getValue());
+                        newMapForMethodName.put(globalEntry.getKey(), globalEntry.getValue());
                     }
-                    merged = true;
-                    break;
                 }
             }
-
-            if (!merged) {
-                returnMap.put(globalKey, globalValue);
-            }
         }
-
-        // Add any entries from currentOverloadMap that were not processed
-        currentOverloadMap.entrySet().stream()
-                .filter(entry -> !returnMap.containsKey(entry.getKey()))
-                .forEach(entry -> returnMap.put(entry.getKey(), entry.getValue()));
-
-        return returnMap;
+        this.overloadDegreeMapByMethodName.replace(Objects.requireNonNull(methodName), newMapForMethodName);
     }
 
     private boolean haveCommonHierarchy(Class<?> class1, Class<?> class2) {
@@ -177,5 +143,9 @@ public class JavaSEOverloadFinder {
             methodInfoFirstDefinedBooleanMap.put(methodInfo, isFirstDefined);
         }
         return methodInfoFirstDefinedBooleanMap;
+    }
+
+    public Map<String, Map<MethodInfo, Integer>> getOverloadDegreeMapByMethodName() {
+        return overloadDegreeMapByMethodName;
     }
 }
