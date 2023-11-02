@@ -1,3 +1,4 @@
+package testClasses;
 
 class MyClass implements CombinedInterface{
     @Override

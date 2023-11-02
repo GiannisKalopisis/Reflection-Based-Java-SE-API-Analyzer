@@ -1,3 +1,5 @@
+package testClasses;
+
 public class TestClass2 extends MyClass implements FirstInterface{
 
     public void yetAnotherMethod(int test) {
