@@ -1,3 +1,11 @@
+import Analyzer.JavaSEAnalyzer;
+import Analyzer.JavaSEFinderWithoutLibrary;
+import Helper.IOHelper;
+import Helper.Utils;
+import Overload.JavaSEOverloadFinder;
+import Polymorphism.JavaSEPolymorphicTypeFinderFaster;
+import Polymorphism.PolymorphismAnalyzer;
+
 import java.util.*;
 
 
@@ -5,7 +13,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-//        int topN = Utils.topNParameterParser(args);
+//        int topN = Helper.Utils.topNParameterParser(args);
 
         /*
          * Analyze JavaSE (modules, packages, types)
@@ -29,7 +37,7 @@ public class Main {
         System.out.println("\n");
         Utils.startTimeCounter();
 
-//        PolymorphismAnalyzer polymorphicTypeFinder = new JavaSEPolymorphicTypeFinder(javaSEAnalyzer.getAllTypes());
+//        Polymorphism.PolymorphismAnalyzer polymorphicTypeFinder = new Polymorphism.JavaSEPolymorphicTypeFinder(javaSEAnalyzer.getAllTypes());
         PolymorphismAnalyzer polymorphicTypeFinder = new JavaSEPolymorphicTypeFinderFaster(javaSEAnalyzer.getAllTypes());
         Map<Class<?>, Set<Class<?>>> classPolymorphicDegreeMap = polymorphicTypeFinder.calculatePolymorphicDegrees();
         IOHelper.printTopNPolymorphicTypesToTerminal(classPolymorphicDegreeMap, 100);
@@ -47,7 +55,7 @@ public class Main {
         IOHelper.printTopNMethods(100, overloadFinder.getOverloadDegreeMapByMethodName());
 
         overloadTime = Utils.endTimeCounter();
-        
+
         IOHelper.printTime(analyzeTime, polymorphicTime, overloadTime);
     }
 }
