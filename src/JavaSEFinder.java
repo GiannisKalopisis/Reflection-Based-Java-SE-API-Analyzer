@@ -4,20 +4,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JavaSEFinder {
+public class JavaSEFinder implements JavaSEAnalyzer{
 
     private final List<ModuleReference> moduleList;
     private final List<String> packageList;
-    private final Map<ModuleReference, List<String>> modulePackageMap;
-    private final Comparator<ModuleReference> moduleReferenceComparator;
+    private final Map<ModuleReference, List<String>> packagesPerModuleMap;
+    private final Set<Class<?>> types;
 
     public JavaSEFinder() {
         this.moduleList = new ArrayList<>();
         this.packageList = new ArrayList<>();
-        this.modulePackageMap = new HashMap<>();
-        this.moduleReferenceComparator = Comparator.comparing(moduleReference -> moduleReference.descriptor().name());
+        this.packagesPerModuleMap = new HashMap<>();
+        this.types = new HashSet<>();
     }
 
+    @Override
     public void findUniqueModules() {
         ModuleFinder finder = ModuleFinder.ofSystem();
         Set<ModuleReference> moduleReferences = finder.findAll();
@@ -39,38 +40,42 @@ public class JavaSEFinder {
                 .forEach(this.packageList::add);
     }
 
+    public Set<String> getAllPackages() {
+        Set<String> allPackages = new HashSet<>();
+        this.packagesPerModuleMap.values().forEach(allPackages::addAll);
+        return allPackages;
+    }
+
+    @Override
     public void findPackagesPerModule() {
         for (ModuleReference mdl : this.moduleList) {
             List<String> packageList = Stream.of(mdl)
                     .flatMap(module -> module.descriptor().packages().stream())
-                    .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax.") || pkg.startsWith("org."))
+                    .filter(pkg -> pkg.startsWith("java.") || pkg.startsWith("javax."))
                     .sorted(Comparator.naturalOrder())
                     .collect(Collectors.toCollection(ArrayList::new));
-            this.modulePackageMap.put(mdl, packageList);
+            this.packagesPerModuleMap.put(mdl, packageList);
         }
     }
 
-    public void printModulePackageMap() {
-        modulePackageMap.forEach((moduleReference, packageList) -> {
-            System.out.println("\nModule: " + moduleReference.descriptor().name());
-            packageList.forEach(pkg -> System.out.println("\t" + pkg));
-        });
+    @Override
+    public void findTypes() {
+        // Couldn't implement this method
     }
 
-    public void findTypesInJavaSEAPIPackages() throws ClassNotFoundException {
-        // TODO: find all types (class and interface) for every package and add them to a List<Class<?>>.
+    @Override
+    public Set<Class<?>> getAllTypes() {
+        return this.types;
     }
 
-    public void sortModules() {
-        Utils.sortList(this.moduleList, moduleReferenceComparator);
+    @Override
+    public void printTotalResults() {
+        System.out.println("Total modules: " + this.moduleList.size());
+        if (this.packageList.isEmpty()) {
+            System.out.println("Total packages: " + this.packagesPerModuleMap.values().stream().mapToInt(List::size).sum());
+        } else {
+            System.out.println("Total packages: " + this.packageList.size());
+        }
+        System.out.println("Total types: " + this.types.size());
     }
-
-    public List<ModuleReference> getModuleList() {
-        return moduleList;
-    }
-
-    public List<String> getPackageList() {
-        return packageList;
-    }
-
 }
