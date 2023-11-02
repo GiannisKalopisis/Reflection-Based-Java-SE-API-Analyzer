@@ -11,7 +11,7 @@ public class Main {
          * Analyze JavaSE (modules, packages, types)
          */
 
-        long totalTime = 0;
+        long analyzeTime = 0, polymorphicTime = 0, overloadTime = 0;
 
         Utils.startTimeCounter();
         JavaSEAnalyzer javaSEAnalyzer = new JavaSEFinderWithoutLibrary();
@@ -21,7 +21,7 @@ public class Main {
         javaSEAnalyzer.findTypes();
         javaSEAnalyzer.printTotalResults();
 
-        totalTime += Utils.endTimeCounter();
+        analyzeTime = Utils.endTimeCounter();
 
         /*
          * Polymorphic degree
@@ -34,7 +34,7 @@ public class Main {
         Map<Class<?>, Set<Class<?>>> classPolymorphicDegreeMap = polymorphicTypeFinder.calculatePolymorphicDegrees();
         IOHelper.printTopNPolymorphicTypesToTerminal(classPolymorphicDegreeMap, 100);
 
-        totalTime += Utils.endTimeCounter();
+        polymorphicTime = Utils.endTimeCounter();
 
         /*
          * Overload degree
@@ -46,7 +46,8 @@ public class Main {
         overloadFinder.calculateOverloadDegree();
         IOHelper.printTopNMethods(100, overloadFinder.getOverloadDegreeMapByMethodName());
 
-        totalTime += Utils.endTimeCounter();
-        Utils.printTime(totalTime);
+        overloadTime = Utils.endTimeCounter();
+        
+        IOHelper.printTime(analyzeTime, polymorphicTime, overloadTime);
     }
 }

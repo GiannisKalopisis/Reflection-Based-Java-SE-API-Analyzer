@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,5 +83,24 @@ public class IOHelper {
                     int value = entry.getValue();
                     System.out.println(method.getMethodName() + " (" + method.getClassInfo().getName() + ") : " + value);
                 });
+    }
+
+
+    public static void printTime(long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
+        String formattedTime = sdf.format(new Date(time));
+        System.out.println("Elapsed Time: " + formattedTime);
+    }
+
+    private static String formatTime(long time) {
+        SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
+        return sdf.format(new Date(time));
+    }
+
+    public static void printTime(long analyzeTime, long polymorphicTime, long overloadTime) {
+        System.out.println("\nAnalyze time: " + formatTime(analyzeTime) + " ms");
+        System.out.println("Counting Polymorphism time: " + formatTime(polymorphicTime) + " ms");
+        System.out.println("Counting Overload time: " + formatTime(overloadTime) + " ms");
+        System.out.println("Total time: " + formatTime(analyzeTime + polymorphicTime + overloadTime) + " ms");
     }
 }

@@ -159,10 +159,4 @@ public class Utils {
         System.out.println("Elapsed Time: " + formattedTime);
         return elapsedTime;
     }
-
-    public static void printTime(long time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
-        String formattedTime = sdf.format(new Date(time));
-        System.out.println("Elapsed Time: " + formattedTime);
-    }
 }
