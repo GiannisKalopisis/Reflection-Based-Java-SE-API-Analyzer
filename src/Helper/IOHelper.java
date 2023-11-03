@@ -70,7 +70,8 @@ public class IOHelper {
      * @param topN                          The number of top overloaded methods to print. A value of 0 prints all methods.
      * @param overloadDegreeMapByMethodName A map of method names and their associated Polymorphism.MethodInfo objects and overload degrees.
      */
-    public static void printTopNMethods(int topN, Map<String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName) {
+    public static void printTopNOverloadedMethods(int topN, Map<String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName) {
+        System.out.println("\nTop " + topN + " overloaded methods: ");
         // Flatten the map into a list of Polymorphism.MethodInfo-Integer pairs
         List<Map.Entry<MethodInfo, Integer>> methodInfoList = overloadDegreeMapByMethodName
                 .values()
@@ -89,18 +90,37 @@ public class IOHelper {
                 });
     }
 
-
+    /**
+     * Formats and prints the elapsed time to the terminal in the "mm:ss:SSS" format.
+     *
+     * @param time The time in milliseconds to be formatted and printed.
+     */
     public static void printTime(long time) {
         SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
         String formattedTime = sdf.format(new Date(time));
         System.out.println("Elapsed Time: " + formattedTime);
     }
 
+    /**
+     * Formats the given time in milliseconds to the "mm:ss:SSS" format.
+     *
+     * @param time The time in milliseconds to be formatted.
+     * @return A string representation of the formatted time.
+     */
     private static String formatTime(long time) {
         SimpleDateFormat sdf = new SimpleDateFormat("mm:ss:SSS");
         return sdf.format(new Date(time));
     }
 
+
+    /**
+     * Prints the times for different stages, including analyze time, polymorphic time,
+     * overload time, and the total time.
+     *
+     * @param analyzeTime      The time taken for analysis in milliseconds.
+     * @param polymorphicTime  The time taken for counting polymorphism in milliseconds.
+     * @param overloadTime     The time taken for counting overload in milliseconds.
+     */
     public static void printTime(long analyzeTime, long polymorphicTime, long overloadTime) {
         System.out.println("\nAnalyze time: " + formatTime(analyzeTime) + " ms");
         System.out.println("Counting Polymorphism time: " + formatTime(polymorphicTime) + " ms");

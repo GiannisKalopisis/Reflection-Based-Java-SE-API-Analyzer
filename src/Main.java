@@ -1,5 +1,5 @@
 import Analyzer.JavaSEAnalyzer;
-import Analyzer.JavaSEFinderWithoutLibrary;
+import Analyzer.JavaSEModuleInfoAnalyzer;
 import Helper.IOHelper;
 import Helper.Utils;
 import Overload.JavaSEOverloadFinder;
@@ -22,7 +22,7 @@ public class Main {
         long analyzeTime = 0, polymorphicTime = 0, overloadTime = 0;
 
         Utils.startTimeCounter();
-        JavaSEAnalyzer javaSEAnalyzer = new JavaSEFinderWithoutLibrary();
+        JavaSEAnalyzer javaSEAnalyzer = new JavaSEModuleInfoAnalyzer();
 
         javaSEAnalyzer.findUniqueModules();
         javaSEAnalyzer.findPackagesPerModule();
@@ -34,7 +34,6 @@ public class Main {
         /*
          * Polymorphic degree
          */
-        System.out.println("\n");
         Utils.startTimeCounter();
 
 //        Polymorphism.PolymorphismAnalyzer polymorphicTypeFinder = new Polymorphism.JavaSEPolymorphicTypeFinder(javaSEAnalyzer.getAllTypes());
@@ -52,7 +51,7 @@ public class Main {
 
         JavaSEOverloadFinder overloadFinder = new JavaSEOverloadFinder(polymorphicTypeFinder.getTopLvlReceivedMethods(), classPolymorphicDegreeMap);
         overloadFinder.calculateOverloadDegree();
-        IOHelper.printTopNMethods(100, overloadFinder.getOverloadDegreeMapByMethodName());
+        IOHelper.printTopNOverloadedMethods(100, overloadFinder.getOverloadDegreeMapByMethodName());
 
         overloadTime = Utils.endTimeCounter();
 

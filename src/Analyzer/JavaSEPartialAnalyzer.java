@@ -6,20 +6,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class JavaSEFinder implements JavaSEAnalyzer{
+/**
+ * The `JavaSEPartialAnalyzer` class is an implementation of the `JavaSEAnalyzer` interface, designed to partially analyze
+ * modules, packages, and types within the Java SE (Standard Edition) runtime environment.
+ * <p>
+ * This class focuses on discovering and extracting module information, package names, and the association between
+ * modules and their exported packages.
+ * <p>
+ * While it can identify modules and packages, it does not attempt to locate and analyze types (classes) within the modules.
+ */
+public class JavaSEPartialAnalyzer implements JavaSEAnalyzer{
 
     private final List<ModuleReference> moduleList;
     private final List<String> packageList;
     private final Map<ModuleReference, List<String>> packagesPerModuleMap;
     private final Set<Class<?>> types;
 
-    public JavaSEFinder() {
+    public JavaSEPartialAnalyzer() {
         this.moduleList = new ArrayList<>();
         this.packageList = new ArrayList<>();
         this.packagesPerModuleMap = new HashMap<>();
         this.types = new HashSet<>();
     }
 
+    /**
+     * Finds and adds unique modules from the Java SE runtime to the `moduleList`.
+     */
     @Override
     public void findUniqueModules() {
         ModuleFinder finder = ModuleFinder.ofSystem();
@@ -33,6 +45,9 @@ public class JavaSEFinder implements JavaSEAnalyzer{
                 .forEach(this.moduleList::add);
     }
 
+    /**
+     * Finds and adds package names starting with "java." or "javax." from the discovered modules to the `packageList`.
+     */
     public void findPackages() {
         this.moduleList
                 .stream()
@@ -48,6 +63,9 @@ public class JavaSEFinder implements JavaSEAnalyzer{
         return allPackages;
     }
 
+    /**
+     * Finds and maps packages starting with "java." or "javax." per module, populating the `packagesPerModuleMap`.
+     */
     @Override
     public void findPackagesPerModule() {
         for (ModuleReference mdl : this.moduleList) {
@@ -60,9 +78,12 @@ public class JavaSEFinder implements JavaSEAnalyzer{
         }
     }
 
+    /**
+     * The `findTypes` method is not implemented in this class (placeholder).
+     */
     @Override
     public void findTypes() {
-        // Couldn't implement this method
+        // Not implemented method
     }
 
     @Override

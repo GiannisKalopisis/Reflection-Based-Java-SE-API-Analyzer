@@ -5,8 +5,15 @@ import Polymorphism.MethodInfo;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-public class JavaSEOverloadFinder {
+/**
+ * The `JavaSEOverloadFinder` class is responsible for analyzing method overloading within a Java SE context.
+ * It implements the `OverloadAnalyzer` interface and provides the functionality to calculate the overload degree
+ * of methods and maintain a map that associates method names with their respective overload information.
+ * <p>
+ * This class considers class hierarchies and method definitions to calculate the overload degree, taking into account
+ * inheritance and method redefinitions.
+ */
+public class JavaSEOverloadFinder implements OverloadAnalyzer {
 
     private final Map<Class<?>, Map<String, List<MethodInfo>>> topLvlReceivedMethods;
     private final Map <String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName;
@@ -19,6 +26,7 @@ public class JavaSEOverloadFinder {
 //        receivedMethods.forEach((key, value) -> this.topLvlReceivedMethods.put(key, Helper.Utils.groupByMethodName(value)));
     }
 
+    @Override
     public void calculateOverloadDegree() {
         this.topLvlReceivedMethods.forEach((topLvlClass, groupedMethods) -> {
             groupedMethods.forEach((methodName, methodList) -> {    // i.e (bar, [{bar, [], class1}, {bar, [int, String], class2}]) ->
@@ -79,6 +87,13 @@ public class JavaSEOverloadFinder {
         this.overloadDegreeMapByMethodName.replace(Objects.requireNonNull(methodName), newMapForMethodName);
     }
 
+    /**
+     * Checks whether two classes have a common hierarchy type (class/interface) in their inheritance chain.
+     *
+     * @param class1 The first class.
+     * @param class2 The second class.
+     * @return `true` if the classes have a common hierarchy, `false` otherwise.
+     */
     private boolean haveCommonHierarchy(Class<?> class1, Class<?> class2) {
         Set<Class<?>> hierarchy1 = this.polymorphicDegrees.get(class1);
         Set<Class<?>> hierarchy2 = this.polymorphicDegrees.get(class2);
@@ -116,6 +131,13 @@ public class JavaSEOverloadFinder {
         overloadDegreeCounter.putAll(newOverloadDegreeCounter);
     }
 
+    /**
+     * Calculates the overload degree based on method hierarchies and method definitions. For each method that is firstly
+     * defined calculate the overload degree based on the hierarchy chain of its class.
+     *
+     * @param methodFirstDefined    A map of method information and a boolean indicating if they are first defined.
+     * @param overloadDegreeCounter A map of method information and their associated overload degrees to be calculated.
+     */
     private void calculateOverloadCounter(Map<MethodInfo, Boolean> methodFirstDefined, Map<MethodInfo, Integer> overloadDegreeCounter) {
         methodFirstDefined.forEach((methodInfo, isFirstDefined) -> {
             if (!isFirstDefined) {
@@ -129,6 +151,13 @@ public class JavaSEOverloadFinder {
         });
     }
 
+    // TODO: make the comment more formal
+    /**
+     * Determines whether a method is first defined in its hierarchy.
+     *
+     * @param methodInfoList A list of method information.
+     * @return A map indicating which methods are first defined in their hierarchies.
+     */
     private Map<MethodInfo, Boolean> findTopHierarchyMethodDeclarations(List<MethodInfo> methodInfoList) {
         Map<MethodInfo, Boolean> methodInfoFirstDefinedBooleanMap = new HashMap<>();
         Set<Class<?>> methodClassesSet = methodInfoList.stream()

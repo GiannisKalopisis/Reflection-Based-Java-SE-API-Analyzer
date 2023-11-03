@@ -3,6 +3,14 @@ package Polymorphism;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The `MethodInfo` class represents information about a method, including its name, parameter types, and declaring class.
+ * Instances of this class are used to encapsulate method-related details for analysis and comparison purposes.
+ * <p>
+ * This class provides a convenient way to store and access method information, and it includes methods to retrieve
+ * the method name, parameter types, and declaring class, as well as methods for string representation, equality comparison,
+ * and generating hash codes.
+ */
 public class MethodInfo {
 
     private final String methodName;

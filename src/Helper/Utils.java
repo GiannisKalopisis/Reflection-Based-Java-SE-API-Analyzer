@@ -15,6 +15,14 @@ public class Utils {
 
     static long startTime = 0;
 
+    /**
+     * Groups a list of MethodInfo objects by their method names into a map.
+     * For each MethodInfo object in the input list, this method extracts the method name and adds the
+     * MethodInfo object to a list associated with that method name in the resulting map.
+     *
+     * @param methodInfoList A list of MethodInfo objects to be grouped by method name.
+     * @return A map where the keys are method names, and the values are lists of MethodInfo objects with the same method name.
+     */
     public static Map<String, List<MethodInfo>> groupByMethodName(List<MethodInfo> methodInfoList) {
         Map<String, List<MethodInfo>> methodInfoMap = new HashMap<>();
 
@@ -92,7 +100,7 @@ public class Utils {
      * @param map The map to be sorted.
      * @return A new map sorted by values in descending order.
      */
-    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValueDesc(Map<K, V> map) {
+    public static <K, V extends Comparable<? super V>> Map<K, V> sortByValueDescending(Map<K, V> map) {
         List<Map.Entry<K, V>> entryList = new ArrayList<>(map.entrySet());
 
         entryList.sort((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));

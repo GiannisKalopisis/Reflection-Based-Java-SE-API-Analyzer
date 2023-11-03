@@ -8,7 +8,17 @@ import java.lang.module.ResolvedModule;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
+/**
+ * The `JavaSEModuleInfoAnalyzer` class is an implementation of the `JavaSEAnalyzer` interface, designed for analyzing modules,
+ * packages, and types within the Java SE (Standard Edition) runtime environment.
+ * <p>
+ * This class provides methods to find unique modules in the Java SE runtime, discover packages, identify packages per module,
+ * and locate types (classes) within the modules.
+ * <p>
+ * It leverages the Java Platform Module System (JPMS) to access module and package information, and it collects class information
+ * based on the exported packages of modules.
+ */
+public class JavaSEModuleInfoAnalyzer implements JavaSEAnalyzer{
 
     private final ModuleLayer bootLayer;
     private final Configuration bootConfig;
@@ -17,7 +27,7 @@ public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
     private final Map<Module, Set<String>> packagesPerModuleMap;
     private final Set<Class<?>> types;
 
-    public JavaSEFinderWithoutLibrary() {
+    public JavaSEModuleInfoAnalyzer() {
         this.moduleList = new ArrayList<>();
         this.packageList = new HashSet<>();
         this.packagesPerModuleMap = new HashMap<>();
@@ -26,6 +36,9 @@ public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
         this.bootConfig = bootLayer.configuration();
     }
 
+    /**
+     * Finds and adds unique modules in the Java SE runtime to the `moduleList`.
+     */
     @Override
     public void findUniqueModules() {
         ModuleLayer bootLayer = ModuleLayer.boot();
@@ -34,6 +47,9 @@ public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
                 .forEach(this.moduleList::add);
     }
 
+    /**
+     * Finds and adds packages starting with "java." or "javax." from the discovered modules to the `packageList`.
+     */
     public void findPackages() {
         moduleList.forEach(m -> {
             Set<String> packages = m.getPackages()
@@ -50,6 +66,9 @@ public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
         return allPackages;
     }
 
+    /**
+     * Finds and maps packages starting with "java." or "javax." per module, populating the`packagesPerModuleMap`.
+     */
     @Override
     public void findPackagesPerModule() {
         this.moduleList.forEach( m -> {
@@ -61,6 +80,10 @@ public class JavaSEFinderWithoutLibrary implements JavaSEAnalyzer{
                 });
     }
 
+    /**
+     * Finds and adds types (classes) from the modules to the `types` set.
+     * Types are extracted from exported packages of modules.
+     */
     @Override
     public void findTypes() {
         this.moduleList.forEach(m -> {
