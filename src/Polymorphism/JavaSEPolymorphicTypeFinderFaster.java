@@ -4,8 +4,18 @@ import Helper.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
+/**
+ * The `JavaSEPolymorphicTypeFinderFaster` class is responsible for analyzing polymorphism and type hierarchies within a Java SE context.
+ * It extends the `PolymorphismAnalyzerHelper` and implements the `PolymorphismAnalyzer` interface, providing efficient
+ * polymorphic degree calculations and maintaining a map that associates top-level classes with their received methods.
+ * This class performs a recursive analysis to determine polymorphic degrees of classes and their type hierarchies.
+ */
 public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelper implements PolymorphismAnalyzer {
 
+    /**
+     * A set that stores top-level classes to be analyzed.
+     */
     private Set<Class<?>> topLvlClasses;
 
     public JavaSEPolymorphicTypeFinderFaster(Set<Class<?>> classesToAnalyze) {
@@ -13,9 +23,16 @@ public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelp
         this.topLvlClasses = new HashSet<>();
     }
 
+    /**
+     * Calculates the polymorphic degrees of classes and their type hierarchies.
+     * It performs a recursive analysis to determine the polymorphic degrees and organizes the type hierarchies. It also
+     * calls the `addMethodsToTopLvlHierarchyClasses` method to add the methods to the top level hierarchy classes.
+     * Visited classes already calculated their polymorphic degrees and there is no need to revisit them.
+     *
+     * @return A map associating classes with their polymorphic degrees and type hierarchies.
+     */
     @Override
     public Map<Class<?>, Set<Class<?>>> calculatePolymorphicDegrees() {
-        // keep set of visited classes if current iteration class is inside continue
         Set<Class<?>> visitedClasses = new HashSet<>();
         for (Class<?> clazz : this.classesToAnalyze) {
             if (visitedClasses.contains(clazz)) {
@@ -29,6 +46,12 @@ public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelp
         return this.polymorphicDegrees;
     }
 
+    /**
+     * Recursively calculates the polymorphic degrees and type hierarchies of a class. Keep also the top-level classes.
+     *
+     * @param clazz The class to calculate the polymorphic degree for.
+     * @return A set of classes representing the type hierarchy of the input class.
+     */
     private Set<Class<?>> calculatePolymorphicDegreesRecursively(Class<?> clazz) {
         Set<Class<?>> inheritanceClassGraph = new LinkedHashSet<>();
         if (clazz == null || polymorphicDegrees.containsKey(clazz)) {
@@ -52,6 +75,18 @@ public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelp
         return inheritanceClassGraph;
     }
 
+    /**
+     * Adds methods to top-level hierarchy classes based on common classes and inheritance hierarchy.
+     * - Get the map sorted by the polymorphic degree in ascending order.
+     * - Firstly add all the methods from the top level classes that have polymorphic degree 1.
+     * - Secondly add all the methods from the top level classes that have polymorphic degree 2.
+     * - Thirdly add all the methods from the top level classes that have polymorphic degree 3.
+     * - And so on...
+     * <p>
+     * The logic is that all the classes that have polymorphic degree 2, must include all the classes
+     * that have polymorphic degree 1, the classes that have polymorphic degree 3, must include all the classes
+     * that have polymorphic degree 2... and so on.
+     */
     private void addMethodsToTopLvlHierarchyClasses() {
 
         for (Map.Entry<Class<?>, Set<Class<?>>> entry : this.polymorphicDegrees.entrySet()) {

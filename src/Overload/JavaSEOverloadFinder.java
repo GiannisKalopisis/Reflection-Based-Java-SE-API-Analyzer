@@ -15,17 +15,44 @@ import java.util.stream.Collectors;
  */
 public class JavaSEOverloadFinder implements OverloadAnalyzer {
 
+    /**
+     * A map that associates top-level classes with a map that groups method names and their respective method information lists.
+     * This map is used to organize (by name) and analyze the methods for calculating overload degrees.
+     */
     private final Map<Class<?>, Map<String, List<MethodInfo>>> topLvlReceivedMethods;
+
+    /**
+     * A map that associates method names with a map containing method information and their associated overload degrees.
+     * This map stores the final overload degree information for each method name.
+     */
     private final Map <String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName;
+
+    /**
+     * A map that associates classes with a set of classes that represent the polymorphic hierarchy of the associated class.
+     * It is used to determine whether two classes have a common hierarchy type in their inheritance chain.
+     */
     private final Map<Class<?>, Set<Class<?>>> polymorphicDegrees;
 
     public JavaSEOverloadFinder(Map<Class<?>, Map<String, List<MethodInfo>>> receivedMethods, Map<Class<?>, Set<Class<?>>> polymorphicDegrees) {
         this.polymorphicDegrees = polymorphicDegrees;
         this.overloadDegreeMapByMethodName = new HashMap<>();
         this.topLvlReceivedMethods = receivedMethods;
-//        receivedMethods.forEach((key, value) -> this.topLvlReceivedMethods.put(key, Helper.Utils.groupByMethodName(value)));
     }
 
+    /**
+     * Calculates the overload degree of methods by analyzing method hierarchies and definitions.
+     * For each method, it calculates the overload degree based on its class's hierarchy.
+     * It takes into account method inheritance and redefinitions.
+     * <p>
+     * The overload degree is calculated as follows:
+     *      - For each top-level class, iterate through its grouped methods (grouped by name).
+     *          - For each method name, iterate through its method list.
+     *              - For each method in the method list, check if it is first defined in its hierarchy.
+     *              - If it is first defined, make the overload degree of it 1.
+     *              - Then calculate the overload degree of the rest methods.
+     *              - Summarize methods of the same class.
+     *              - Merge overload degree map and the existing map (from other top-level classes).
+     */
     @Override
     public void calculateOverloadDegree() {
         this.topLvlReceivedMethods.forEach((topLvlClass, groupedMethods) -> {
@@ -35,7 +62,6 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
                         .stream()
                         .filter(Map.Entry::getValue)
                         .collect(Collectors.toMap(Map.Entry::getKey, entry -> 1, (existingValue, newValue) -> existingValue, HashMap::new));
-
                 calculateOverloadCounter(methodTopHierarchyDefined, overloadDegreeCounter);
                 sumUpSameClassMethods(overloadDegreeCounter);
                 mergeMaps(overloadDegreeCounter);
@@ -43,6 +69,20 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
         });
     }
 
+    /**
+     * Merges the calculated overload degrees of methods with the same method name, considering their classes and hierarchy.
+     * <p>
+     * Merge the maps as follow:
+     *      - Iterate through all entries of the current map for the SAME METHOD NAME ONLY.
+     *          - If the global map doesn't have the same method name, add all the current map to the global map.
+     *          - Iterate through all entries of the global map for the SAME METHOD NAME ONLY.
+     *              - If they have the same CLASS_NAME, keep the biggest value.
+     *              - If they have different CLASS_NAME:
+     *                  - If they have common classes in their hierarchy, keep the entry with the biggest value.
+     *                  - If they have disjoint sets of hierarchy classes, keep both entries.
+     *
+     * @param currentOverloadMap The overload degree map of current class.
+     */
     public void mergeMaps(Map<MethodInfo, Integer> currentOverloadMap) {
 
         // Iterate through all entries of the current map for the SAME METHOD NAME ONLY
@@ -101,6 +141,12 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
         return hierarchy1.stream().anyMatch(hierarchy2::contains);
     }
 
+    /**
+     * Sums up the overload degrees of methods with the same class and method name.
+     * It replaces the original map with a new map containing updated overload degrees.
+     *
+     * @param overloadDegreeCounter A map of method information and their associated overload degrees.
+     */
     public void sumUpSameClassMethods(Map<MethodInfo, Integer> overloadDegreeCounter) {
         Map<MethodInfo, Integer> newOverloadDegreeCounter = new HashMap<>();
 
@@ -132,8 +178,8 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
     }
 
     /**
-     * Calculates the overload degree based on method hierarchies and method definitions. For each method that is firstly
-     * defined calculate the overload degree based on the hierarchy chain of its class.
+     * Calculates the overload degree based on method hierarchies and method definitions. For each method that is not
+     * firstly defined calculate the overload degree based on the hierarchy chain of its class.
      *
      * @param methodFirstDefined    A map of method information and a boolean indicating if they are first defined.
      * @param overloadDegreeCounter A map of method information and their associated overload degrees to be calculated.
@@ -151,9 +197,13 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
         });
     }
 
-    // TODO: make the comment more formal
     /**
-     * Determines whether a method is first defined in its hierarchy.
+     * Determines which is the highest hierarchy class that defined the method.
+     *  - Get the class hierarchy set of the methods `methodClassesSet` (from which class came every method).
+     *  - For each method, get class hierarchy list of the class that it was defined.
+     *      - Check if the set of class hierarchy `methodClassesSet` has any class in common with the `currentMethodsClassHierarchyClasses`.
+     *          - If it has, then the method is not first defined in its hierarchy.
+     *          - If it doesn't have, then the method is first defined in its hierarchy.
      *
      * @param methodInfoList A list of method information.
      * @return A map indicating which methods are first defined in their hierarchies.
@@ -164,7 +214,6 @@ public class JavaSEOverloadFinder implements OverloadAnalyzer {
                 .map(MethodInfo::getClassInfo)
                 .collect(Collectors.toSet());
         for (MethodInfo methodInfo : methodInfoList) {
-            // Gia ka8e mia apo tis klaseis sth lista toy hierarchy bres an oristhke ekei to sugkekrimeno method
             Set<Class<?>> currentMethodsClassHierarchyClasses = this.polymorphicDegrees.get(methodInfo.getClassInfo());
             boolean isFirstDefined = true;
             for (Class<?> currentClass : currentMethodsClassHierarchyClasses) {

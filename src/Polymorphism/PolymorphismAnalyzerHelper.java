@@ -17,11 +17,13 @@ abstract class PolymorphismAnalyzerHelper {
      * Set of classes/interfaces to be analyzed for polymorphism (all types of the Java 17 SE API)
      */
     protected final Set<Class<?>> classesToAnalyze;
+
     /**
      * A map that stores the inherit chain of each type. The keys are type (classes/interfaces), and the values are sets
      * of associated inherited types.
      */
     protected Map<Class<?>, Set<Class<?>>> polymorphicDegrees;
+
     /**
      * A map that stores top-level received methods for different classes. The keys are classes, and the values are maps that store method names
      * and corresponding lists of MethodInfo objects.
