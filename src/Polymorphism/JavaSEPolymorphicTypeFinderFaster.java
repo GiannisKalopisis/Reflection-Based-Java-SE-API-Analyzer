@@ -104,34 +104,6 @@ public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelp
         }
     }
 
-    /**
-     * This method sort the polymorphicDegrees map by the size of the value (Set<Class<?>>) in ascending order.
-     */
-    public void sortPolymorphicDegreesInPlace() {
-        this.polymorphicDegrees = polymorphicDegrees.entrySet()
-                .stream()
-                .sorted(Comparator.comparing(entry -> entry.getValue().size()))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
-    }
-
-    /** This method check if all the classes from polymorphicDegrees that have polymorphic degree 1 are the top level classes,
-     *  or if there are some classes that are not top level classes and have polymorphic degree 1.
-     */
-    private void checkPolymorphicDegreesOneAndTopLvlClasses() {
-        this.polymorphicDegrees.forEach((clazz, inheritanceClassGraph) -> {
-            if (inheritanceClassGraph.size() == 1) {
-                if (!this.topLvlClasses.contains(clazz)) {
-                    System.out.println("Class " + clazz.getName() + " has polymorphic degree 1 but is not a top level class");
-                }
-            }
-        });
-    }
-
     @Override
     public Map<Class<?>, Map<String, List<MethodInfo>>> getTopLvlReceivedMethods() {
         return this.topLvlReceivedMethods;
