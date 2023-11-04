@@ -64,10 +64,6 @@ public class JavaSEPolymorphicTypeFinderFaster  extends PolymorphismAnalyzerHelp
             inheritanceClassGraph.addAll(calculatePolymorphicDegreesRecursively(iface));
         }
 
-        if (inheritanceClassGraph.isEmpty()) {  // Reached top of inheritance level -> add empty methods list
-            this.topLvlReceivedMethods.computeIfAbsent(clazz, k -> new HashMap<>());
-        }
-
         inheritanceClassGraph.add(clazz);
 
         this.polymorphicDegrees.put(clazz, inheritanceClassGraph);
