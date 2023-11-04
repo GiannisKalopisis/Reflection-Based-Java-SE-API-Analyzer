@@ -128,8 +128,7 @@ public class Utils {
                 System.out.println("\n");
             }
         } catch (NullPointerException | IndexOutOfBoundsException | NumberFormatException exception) {
-            System.err.println(exception.getMessage());
-            System.out.println("Default top-N parameter: 5");
+            System.out.println("Default top-N parameter: 5 \n");
             topN = 5;
         }
         return topN;

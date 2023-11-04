@@ -18,28 +18,12 @@ import java.util.Set;
 public class IOHelper {
 
     /**
-     * Prints an entry message to the terminal.
-     */
-    public static void printEntryMessage() {
-        System.out.println("""
-
-                       __       ___   ____    ____  ___             ___      .______    __         ___      .__   __.      ___       __      ____    ____  ________   _______ .______       __   __   __ \s
-                      |  |     /   \\  \\   \\  /   / /   \\           /   \\     |   _  \\  |  |       /   \\     |  \\ |  |     /   \\     |  |     \\   \\  /   / |       /  |   ____||   _  \\     |  | |  | |  |\s
-                      |  |    /  ^  \\  \\   \\/   / /  ^  \\         /  ^  \\    |  |_)  | |  |      /  ^  \\    |   \\|  |    /  ^  \\    |  |      \\   \\/   /  `---/  /   |  |__   |  |_)  |    |  | |  | |  |\s
-                .--.  |  |   /  /_\\  \\  \\      / /  /_\\  \\       /  /_\\  \\   |   ___/  |  |     /  /_\\  \\   |  . `  |   /  /_\\  \\   |  |       \\_    _/      /  /    |   __|  |      /     |  | |  | |  |\s
-                |  `--'  |  /  _____  \\  \\    / /  _____  \\     /  _____  \\  |  |      |  |    /  _____  \\  |  |\\   |  /  _____  \\  |  `----.    |  |       /  /----.|  |____ |  |\\  \\----.|__| |__| |__|\s
-                 \\______/  /__/     \\__\\  \\__/ /__/     \\__\\   /__/     \\__\\ | _|      |__|   /__/     \\__\\ |__| \\__| /__/     \\__\\ |_______|    |__|      /________||_______|| _| `._____|(__) (__) (__)\s
-                                                                                                                                                                                                         \s
-                """);
-    }
-
-    /**
      * Prints the top N polymorphic types to the terminal.
      *
      * @param modules A map of classes and their associated polymorphic types.
      * @param topN    The number of top polymorphic types to print. A value of 0 prints all types.
      */
-    public static void printTopNPolymorphicTypesToTerminal(Map<Class<?>, Set<Class<?>>> modules, int topN) {
+    public static void printTopNPolymorphicTypes(Map<Class<?>, Set<Class<?>>> modules, int topN) {
         System.out.println("\nTop " + topN + " polymorphic types: ");
         Utils.sortByCollectionSizeDescending(modules)
                 .entrySet()
@@ -54,7 +38,7 @@ public class IOHelper {
      * @param methods A map of methods and their associated overload counts.
      * @param topN    The number of top overloaded methods to print. A value of 0 prints all methods.
      */
-    public static void printTopNOverloadedMethodsToTerminal(Map<MethodInfo, Integer> methods, int topN) {
+    public static void printTopNOverloadedMethodsFrom1DMap(Map<MethodInfo, Integer> methods, int topN) {
         System.out.println("\nTop " + topN + " overloaded methods: ");
         methods.entrySet()
                 .stream()
@@ -70,7 +54,7 @@ public class IOHelper {
      * @param topN                          The number of top overloaded methods to print. A value of 0 prints all methods.
      * @param overloadDegreeMapByMethodName A map of method names and their associated Polymorphism.MethodInfo objects and overload degrees.
      */
-    public static void printTopNOverloadedMethods(int topN, Map<String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName) {
+    public static void printTopNOverloadedMethods(Map<String, Map<MethodInfo, Integer>> overloadDegreeMapByMethodName, int topN) {
         System.out.println("\nTop " + topN + " overloaded methods: ");
         // Flatten the map into a list of Polymorphism.MethodInfo-Integer pairs
         List<Map.Entry<MethodInfo, Integer>> methodInfoList = overloadDegreeMapByMethodName
